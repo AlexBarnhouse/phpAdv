@@ -1,0 +1,18 @@
+{
+    "name": "geekbrains/level_two",
+    "autoload": {
+        "psr-4": {
+            "GeekBrains\\LevelTwo\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "AlexBarnhouse",
+            "email": "aragon-1995@mail.ru"
+        }
+    ],
+    "require": {
+        "fakerphp/faker": "^1.21",
+        "roave/security-advisories": "dev-latest"
+    }
+}
