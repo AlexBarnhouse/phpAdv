@@ -1,9 +1,11 @@
 <?php
 
-namespace GeekBrains\Blog\Repositories\UsersRepository;
+namespace GeekBrains\LevelTwo\Blog\Repositories\UsersRepository;
 
 use GeekBrains\LevelTwo\Blog\User;
-class InMemoryUsersRepository
+use GeekBrains\LevelTwo\Blog\UUID;
+
+class InMemoryUsersRepository implements UsersRepositoryInterface
 {
     private array $users = [];
 
@@ -12,14 +14,28 @@ class InMemoryUsersRepository
         $this->users[] = $user;
     }
 
-    public function get(int $id): User
+    public function get(UUID $uuid): User
     {
         foreach ($this->users as $user) {
-            if ($user->id() === $id) {
+            if ($user->uuid() === (string)$uuid) {
                 return $user;
             }
         }
-        throw new UserNotFoundException("User not found: $id");
+        throw new UserNotFoundException("User not found: $uuid");
     }
 
+    public function __toString(): string
+    {
+        return 'Hello';
+    }
+
+    public function getByUsername(string $username): User
+    {
+        foreach ($this->users as $user) {
+            if ($user->username() === $username) {
+                return $user;
+            }
+        }
+        throw new UserNotFoundException("User not found: $username");
+    }
 }

@@ -1,39 +1,22 @@
 <?php
+
+use GeekBrains\LevelTwo\Blog\Commands\Arguments;
+use GeekBrains\LevelTwo\Blog\Commands\CreateUserCommand;
+use GeekBrains\LevelTwo\Blog\Exceptions\AppException;
+use GeekBrains\LevelTwo\Blog\Repositories\UsersRepository\SqliteUsersRepository;
+
+
 require_once __DIR__ . '/vendor/autoload.php';
 
-use GeekBrains\LevelTwo\Person\Name;
-use GeekBrains\LevelTwo\Blog\User;
-use GeekBrains\LevelTwo\Blog\Post;
-use GeekBrains\LevelTwo\Blog\Comment;
-
-$faker = Faker\Factory::create('ru_RU');
-
-$name = new Name(
-    $faker->firstName('male'),
-    $faker->lastName('male')
+$usersRepository = new SqliteUsersRepository(
+    new PDO('sqlite:' . __DIR__ . '/blog.sqlite')
 );
 
-$user = new User(1, $name);
+$command = new CreateUserCommand($usersRepository);
 
-if (isset($argv[1])) {
-    switch ($argv[1]) {
-        case 'user':
-            echo $user;
-            break;
-        case 'post':
-            echo new Post(1,
-                $user,
-                $faker->words(5, true),
-                $faker->realText());
-            break;
-        case 'comment':
-            echo new Comment(1,
-                $user,
-                new Post(1,
-                    $user,
-                    $faker->words(5, true),
-                    $faker->realText()),
-                $faker->text());
-            break;
-    }
+try {
+    $command->handle(Arguments::fromArgv($argv));
+} catch (AppException $e) {
+    echo "{$e->getMessage()}\n";
 }
+
