@@ -45,6 +45,17 @@ VALUES (:uuid, :author_uuid, :title, :text)'
         ]);
     }
 
+    public function delete(UUID $uuid): void
+    {
+        $statement = $this->connection->prepare(
+          'DELETE FROM posts WHERE uuid = :uuid'
+        );
+
+        $statement->execute([
+            ':uuid' => (string)$uuid,
+        ]);
+    }
+
     /**
      * @throws PostNotFoundException
      * @throws InvalidArgumentException
@@ -62,7 +73,7 @@ VALUES (:uuid, :author_uuid, :title, :text)'
         $user = $userRepository->get(new UUID($result['author_uuid']));
 
         return new Post(
-            $result['uuid'],
+            new UUID($result['uuid']),
             $user,
             $result['title'],
             $result['text']

@@ -9,6 +9,7 @@ use GeekBrains\LevelTwo\Blog\Repositories\PostsRepository\SqlitePostsRepository;
 use GeekBrains\LevelTwo\Blog\Repositories\UsersRepository\SqliteUsersRepository;
 use GeekBrains\LevelTwo\Blog\UUID;
 use PDO;
+use PDOStatement;
 
 class SqliteCommentsRepository implements CommentsRepositoryInterface
 {
@@ -18,6 +19,10 @@ class SqliteCommentsRepository implements CommentsRepositoryInterface
     {
     }
 
+    /**
+     * @throws CommentNotFoundException
+     * @throws InvalidArgumentException
+     */
     public function get(UUID $uuid): Comment
     {
         $statement = $this->connection->prepare(
@@ -40,7 +45,7 @@ VALUES (:uuid, :post_uuid, :author_uuid, :text)'
         $statement->execute([
             ':uuid' => (string)$comment->uuid(),
             ':post_uuid' => (string)$comment->post()->uuid(),
-            ':author' => (string)$comment->author()->uuid(),
+            ':author_uuid' => (string)$comment->author()->uuid(),
             ':text' => $comment->text(),
         ]);
     }
@@ -49,7 +54,7 @@ VALUES (:uuid, :post_uuid, :author_uuid, :text)'
      * @throws CommentNotFoundException
      * @throws InvalidArgumentException
      */
-    private function getComment(\PDOStatement $statement, string $commentUuid): Comment
+    private function getComment(PDOStatement $statement, string $commentUuid): Comment
     {
         $result = $statement->fetch(PDO::FETCH_ASSOC);
         if ($result === false){
@@ -59,13 +64,13 @@ VALUES (:uuid, :post_uuid, :author_uuid, :text)'
         }
 
         $postRepository = new SqlitePostsRepository($this->connection);
-        $post = $postRepository->get(new UUID($result['post_UUID']));
+        $post = $postRepository->get(new UUID($result['post_uuid']));
 
         $userRepository = new SqliteUsersRepository($this->connection);
-        $user = $userRepository->get(new UUID($result['user_uuid']));
+        $user = $userRepository->get(new UUID($result['author_uuid']));
 
         return new Comment(
-            $result['uuid'],
+            new UUID($result['uuid']),
             $user,
             $post,
             $result['text']
